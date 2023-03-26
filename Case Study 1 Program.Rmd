@@ -1,0 +1,63 @@
+---
+title: "Case Study 1"
+author: "Megan Van Scoyoc"
+date: "2023-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+setwd("C:/Users/Meggie/Documents/Pharmacometrics/CaseStudy1")
+
+inputdata = read.csv("example2.csv", header = TRUE, skip=3)
+
+head(inputdata)
+
+inputdata.grp = groupedData(CONC~TIME|CID , data = inputdata)
+
+```
+
+
+```{r}
+inputdata$AMT[which(inputdata$AMT == 0)] = as.numeric(NA)
+
+inputdata$CONC[which(inputdata$CONC == 0)] = as.numeric(NA)
+```
+
+```{r}
+library(nlme)
+```
+
+```{r}
+na.include = function(x) x
+
+inputdata.fit = nlme(CONC~phenoModel(CID, TIME, AMT, lCl, lV) , 
+                     fixed = lCl+lv ~1, 
+                     random = pdDiag(lCl+lV ~1) , 
+                     data = inputdata.grp, 
+                     start = c(-5, 0) , 
+                     weight = varConstPower(const=1, fixed=list(power=1)) , 
+                     na.action = na.include, 
+                     naPattern = ~ !is.na(CONC))
+
+
+inputdata.fit$logLik
+
+fixed.effects(inputdata.fit)
+
+exp(fixed.effects(inputdata.fit))
+
+VarCorr(inputdata.fit)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
